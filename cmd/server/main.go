@@ -15,6 +15,7 @@ import (
 	"github.com/h22k/analyzify/config"
 	"github.com/h22k/analyzify/graph"
 	"github.com/h22k/analyzify/internal/db/clickhouse"
+	"github.com/h22k/analyzify/internal/service"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -34,7 +35,9 @@ func main() {
 	}
 
 	go func(port string) {
-		srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+		srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+			EventService: service.NewEventService(conn),
+		}}))
 
 		srv.AddTransport(transport.Options{})
 		srv.AddTransport(transport.GET{})

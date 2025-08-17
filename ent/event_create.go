@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/ent/event"
-	"github.com/h22k/analyzify/ent/schema"
 )
 
 // EventCreate is the builder for creating a Event entity.
@@ -49,8 +48,16 @@ func (_c *EventCreate) SetNillableTimestamp(v *time.Time) *EventCreate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_c *EventCreate) SetMetadata(v *schema.ClickhouseJSON) *EventCreate {
+func (_c *EventCreate) SetMetadata(v string) *EventCreate {
 	_c.mutation.SetMetadata(v)
+	return _c
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_c *EventCreate) SetNillableMetadata(v *string) *EventCreate {
+	if v != nil {
+		_c.SetMetadata(*v)
+	}
 	return _c
 }
 
@@ -129,9 +136,6 @@ func (_c *EventCreate) check() error {
 	if _, ok := _c.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "Event.timestamp"`)}
 	}
-	if _, ok := _c.mutation.Metadata(); !ok {
-		return &ValidationError{Name: "metadata", err: errors.New(`ent: missing required field "Event.metadata"`)}
-	}
 	return nil
 }
 
@@ -180,7 +184,7 @@ func (_c *EventCreate) createSpec() (*Event, *sqlgraph.CreateSpec) {
 		_node.Timestamp = value
 	}
 	if value, ok := _c.mutation.Metadata(); ok {
-		_spec.SetField(event.FieldMetadata, field.TypeOther, value)
+		_spec.SetField(event.FieldMetadata, field.TypeString, value)
 		_node.Metadata = value
 	}
 	return _node, _spec

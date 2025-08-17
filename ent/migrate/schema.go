@@ -14,7 +14,7 @@ var (
 		{Name: "userID", Type: field.TypeUUID},
 		{Name: "event_type", Type: field.TypeString},
 		{Name: "timestamp", Type: field.TypeTime},
-		{Name: "metadata", Type: field.TypeOther, SchemaType: map[string]string{"clickhouse": "JSON"}},
+		{Name: "metadata", Type: field.TypeString, Nullable: true},
 	}
 	// EventsTable holds the schema information for the "events" table.
 	EventsTable = &schema.Table{

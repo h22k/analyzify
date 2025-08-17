@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/h22k/analyzify/ent/event"
 	"github.com/h22k/analyzify/ent/predicate"
-	"github.com/h22k/analyzify/ent/schema"
 )
 
 // EventUpdate is the builder for updating Event entities.
@@ -43,8 +42,22 @@ func (_u *EventUpdate) SetNillableEventType(v *string) *EventUpdate {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *EventUpdate) SetMetadata(v *schema.ClickhouseJSON) *EventUpdate {
+func (_u *EventUpdate) SetMetadata(v string) *EventUpdate {
 	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *EventUpdate) SetNillableMetadata(v *string) *EventUpdate {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *EventUpdate) ClearMetadata() *EventUpdate {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -106,7 +119,10 @@ func (_u *EventUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(event.FieldEventType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(event.FieldMetadata, field.TypeOther, value)
+		_spec.SetField(event.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(event.FieldMetadata, field.TypeString)
 	}
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -143,8 +159,22 @@ func (_u *EventUpdateOne) SetNillableEventType(v *string) *EventUpdateOne {
 }
 
 // SetMetadata sets the "metadata" field.
-func (_u *EventUpdateOne) SetMetadata(v *schema.ClickhouseJSON) *EventUpdateOne {
+func (_u *EventUpdateOne) SetMetadata(v string) *EventUpdateOne {
 	_u.mutation.SetMetadata(v)
+	return _u
+}
+
+// SetNillableMetadata sets the "metadata" field if the given value is not nil.
+func (_u *EventUpdateOne) SetNillableMetadata(v *string) *EventUpdateOne {
+	if v != nil {
+		_u.SetMetadata(*v)
+	}
+	return _u
+}
+
+// ClearMetadata clears the value of the "metadata" field.
+func (_u *EventUpdateOne) ClearMetadata() *EventUpdateOne {
+	_u.mutation.ClearMetadata()
 	return _u
 }
 
@@ -236,7 +266,10 @@ func (_u *EventUpdateOne) sqlSave(ctx context.Context) (_node *Event, err error)
 		_spec.SetField(event.FieldEventType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Metadata(); ok {
-		_spec.SetField(event.FieldMetadata, field.TypeOther, value)
+		_spec.SetField(event.FieldMetadata, field.TypeString, value)
+	}
+	if _u.mutation.MetadataCleared() {
+		_spec.ClearField(event.FieldMetadata, field.TypeString)
 	}
 	_node = &Event{config: _u.config}
 	_spec.Assign = _node.assignValues

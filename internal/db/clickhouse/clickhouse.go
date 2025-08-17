@@ -3,12 +3,15 @@ package clickhouse
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 
 	esql "entgo.io/ent/dialect/sql"
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/h22k/analyzify/ent"
 	query "github.com/h22k/analyzify/internal/db/clickhouse/sql"
+	"github.com/h22k/analyzify/internal/dto"
 )
 
 const clickHouseDialect = "clickhouse"
@@ -60,6 +63,23 @@ func (c *Conn) Migrate() error {
 
 func (c *Conn) GetAllEvents(ctx context.Context) ([]*ent.Event, error) {
 	return c.client.Debug().Event.Query().All(ctx)
+}
+
+func (c *Conn) CreateEvent(ctx context.Context, dto dto.CreateEventDTO) (*ent.Event, error) {
+	metadataBytes, err := json.Marshal(dto.Metadata)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal metadata: %w", err)
+	}
+
+	return c.client.
+		Event.
+		Create().
+		SetID(dto.EventID).
+		SetUserID(dto.UserID).
+		SetEventType(dto.EventType).
+		SetTimestamp(dto.Timestamp).
+		SetMetadata(string(metadataBytes)).
+		Save(ctx)
 }
 
 func (c *Conn) Close() error {

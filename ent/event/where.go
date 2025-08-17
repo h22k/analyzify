@@ -8,7 +8,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/ent/predicate"
-	"github.com/h22k/analyzify/ent/schema"
 )
 
 // ID filters vertices based on their ID field.
@@ -72,7 +71,7 @@ func Timestamp(v time.Time) predicate.Event {
 }
 
 // Metadata applies equality check predicate on the "metadata" field. It's identical to MetadataEQ.
-func Metadata(v *schema.ClickhouseJSON) predicate.Event {
+func Metadata(v string) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldMetadata, v))
 }
 
@@ -222,43 +221,78 @@ func TimestampLTE(v time.Time) predicate.Event {
 }
 
 // MetadataEQ applies the EQ predicate on the "metadata" field.
-func MetadataEQ(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataEQ(v string) predicate.Event {
 	return predicate.Event(sql.FieldEQ(FieldMetadata, v))
 }
 
 // MetadataNEQ applies the NEQ predicate on the "metadata" field.
-func MetadataNEQ(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataNEQ(v string) predicate.Event {
 	return predicate.Event(sql.FieldNEQ(FieldMetadata, v))
 }
 
 // MetadataIn applies the In predicate on the "metadata" field.
-func MetadataIn(vs ...*schema.ClickhouseJSON) predicate.Event {
+func MetadataIn(vs ...string) predicate.Event {
 	return predicate.Event(sql.FieldIn(FieldMetadata, vs...))
 }
 
 // MetadataNotIn applies the NotIn predicate on the "metadata" field.
-func MetadataNotIn(vs ...*schema.ClickhouseJSON) predicate.Event {
+func MetadataNotIn(vs ...string) predicate.Event {
 	return predicate.Event(sql.FieldNotIn(FieldMetadata, vs...))
 }
 
 // MetadataGT applies the GT predicate on the "metadata" field.
-func MetadataGT(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataGT(v string) predicate.Event {
 	return predicate.Event(sql.FieldGT(FieldMetadata, v))
 }
 
 // MetadataGTE applies the GTE predicate on the "metadata" field.
-func MetadataGTE(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataGTE(v string) predicate.Event {
 	return predicate.Event(sql.FieldGTE(FieldMetadata, v))
 }
 
 // MetadataLT applies the LT predicate on the "metadata" field.
-func MetadataLT(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataLT(v string) predicate.Event {
 	return predicate.Event(sql.FieldLT(FieldMetadata, v))
 }
 
 // MetadataLTE applies the LTE predicate on the "metadata" field.
-func MetadataLTE(v *schema.ClickhouseJSON) predicate.Event {
+func MetadataLTE(v string) predicate.Event {
 	return predicate.Event(sql.FieldLTE(FieldMetadata, v))
+}
+
+// MetadataContains applies the Contains predicate on the "metadata" field.
+func MetadataContains(v string) predicate.Event {
+	return predicate.Event(sql.FieldContains(FieldMetadata, v))
+}
+
+// MetadataHasPrefix applies the HasPrefix predicate on the "metadata" field.
+func MetadataHasPrefix(v string) predicate.Event {
+	return predicate.Event(sql.FieldHasPrefix(FieldMetadata, v))
+}
+
+// MetadataHasSuffix applies the HasSuffix predicate on the "metadata" field.
+func MetadataHasSuffix(v string) predicate.Event {
+	return predicate.Event(sql.FieldHasSuffix(FieldMetadata, v))
+}
+
+// MetadataIsNil applies the IsNil predicate on the "metadata" field.
+func MetadataIsNil() predicate.Event {
+	return predicate.Event(sql.FieldIsNull(FieldMetadata))
+}
+
+// MetadataNotNil applies the NotNil predicate on the "metadata" field.
+func MetadataNotNil() predicate.Event {
+	return predicate.Event(sql.FieldNotNull(FieldMetadata))
+}
+
+// MetadataEqualFold applies the EqualFold predicate on the "metadata" field.
+func MetadataEqualFold(v string) predicate.Event {
+	return predicate.Event(sql.FieldEqualFold(FieldMetadata, v))
+}
+
+// MetadataContainsFold applies the ContainsFold predicate on the "metadata" field.
+func MetadataContainsFold(v string) predicate.Event {
+	return predicate.Event(sql.FieldContainsFold(FieldMetadata, v))
 }
 
 // And groups predicates with the AND operator between them.

@@ -7,14 +7,36 @@ package graph
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/graph/model"
+	"github.com/h22k/analyzify/internal/dto"
 )
 
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.NewEvent) (*model.Event, error) {
-	panic(fmt.Errorf("not implemented: CreateEvent - createEvent"))
+	event, err := r.EventService.CreateEvent(ctx, dto.CreateEventDTO{
+		EventID:   uuid.New(),
+		UserID:    input.UserID,
+		EventType: input.EventType,
+		Timestamp: time.Now(),
+		Metadata:  input.Metadata,
+	})
+
+	if err != nil {
+		log.Printf("failed to create event: %v", err) // <- hatayı logla
+		return nil, fmt.Errorf("failed to create event: %w", err)
+	}
+
+	return &model.Event{
+		EventID:   event.EventID,
+		UserID:    event.UserID,
+		EventType: event.EventType,
+		Timestamp: event.Timestamp,
+		Metadata:  event.Metadata,
+	}, nil
 }
 
 // Events is the resolver for the events field.

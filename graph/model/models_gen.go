@@ -9,30 +9,20 @@ import (
 )
 
 type Event struct {
-	EventID   uuid.UUID        `json:"eventID"`
-	UserID    uuid.UUID        `json:"userID"`
-	Timestamp time.Time        `json:"timestamp"`
-	EventType string           `json:"eventType"`
-	Metadata  []*MetadataEntry `json:"metadata"`
-}
-
-type MetadataEntry struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type MetadataInput struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	EventID   uuid.UUID      `json:"eventID"`
+	UserID    uuid.UUID      `json:"userID"`
+	Timestamp time.Time      `json:"timestamp"`
+	EventType string         `json:"eventType"`
+	Metadata  map[string]any `json:"metadata"`
 }
 
 type Mutation struct {
 }
 
 type NewEvent struct {
-	UserID    uuid.UUID        `json:"userID"`
-	EventType string           `json:"eventType"`
-	Metadata  []*MetadataInput `json:"metadata"`
+	UserID    uuid.UUID      `json:"userID"`
+	EventType string         `json:"eventType"`
+	Metadata  map[string]any `json:"metadata"`
 }
 
 type Query struct {

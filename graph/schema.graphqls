@@ -4,29 +4,20 @@
 
 scalar UUID
 scalar Time
-
-type MetadataEntry {
-    key: String!
-    value: String!
-}
+scalar JSON
 
 type Event {
     eventID: UUID!
     userID: UUID!
     timestamp: Time!
     eventType: String!
-    metadata: [MetadataEntry!]!
-}
-
-input MetadataInput {
-    key: String!
-    value: String!
+    metadata: JSON!
 }
 
 input NewEvent {
     userID: UUID!
     eventType: String!
-    metadata: [MetadataInput!]!
+    metadata: JSON!
 }
 
 type Mutation {

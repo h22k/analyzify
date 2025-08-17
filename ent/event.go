@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/ent/event"
-	"github.com/h22k/analyzify/ent/schema"
 )
 
 // Event is the model entity for the Event schema.
@@ -26,7 +25,7 @@ type Event struct {
 	// Timestamp holds the value of the "timestamp" field.
 	Timestamp time.Time `json:"timestamp,omitempty"`
 	// Metadata holds the value of the "metadata" field.
-	Metadata     *schema.ClickhouseJSON `json:"metadata,omitempty"`
+	Metadata     string `json:"metadata,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -35,9 +34,7 @@ func (*Event) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case event.FieldMetadata:
-			values[i] = new(schema.ClickhouseJSON)
-		case event.FieldEventType:
+		case event.FieldEventType, event.FieldMetadata:
 			values[i] = new(sql.NullString)
 		case event.FieldTimestamp:
 			values[i] = new(sql.NullTime)
@@ -83,10 +80,10 @@ func (_m *Event) assignValues(columns []string, values []any) error {
 				_m.Timestamp = value.Time
 			}
 		case event.FieldMetadata:
-			if value, ok := values[i].(*schema.ClickhouseJSON); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field metadata", values[i])
-			} else if value != nil {
-				_m.Metadata = value
+			} else if value.Valid {
+				_m.Metadata = value.String
 			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
@@ -134,7 +131,7 @@ func (_m *Event) String() string {
 	builder.WriteString(_m.Timestamp.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("metadata=")
-	builder.WriteString(fmt.Sprintf("%v", _m.Metadata))
+	builder.WriteString(_m.Metadata)
 	builder.WriteByte(')')
 	return builder.String()
 }

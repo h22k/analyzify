@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/ent/event"
 	"github.com/h22k/analyzify/ent/predicate"
-	"github.com/h22k/analyzify/ent/schema"
 )
 
 const (
@@ -38,7 +37,7 @@ type EventMutation struct {
 	userID        *uuid.UUID
 	eventType     *string
 	timestamp     *time.Time
-	metadata      **schema.ClickhouseJSON
+	metadata      *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Event, error)
@@ -258,12 +257,12 @@ func (m *EventMutation) ResetTimestamp() {
 }
 
 // SetMetadata sets the "metadata" field.
-func (m *EventMutation) SetMetadata(sj *schema.ClickhouseJSON) {
-	m.metadata = &sj
+func (m *EventMutation) SetMetadata(s string) {
+	m.metadata = &s
 }
 
 // Metadata returns the value of the "metadata" field in the mutation.
-func (m *EventMutation) Metadata() (r *schema.ClickhouseJSON, exists bool) {
+func (m *EventMutation) Metadata() (r string, exists bool) {
 	v := m.metadata
 	if v == nil {
 		return
@@ -274,7 +273,7 @@ func (m *EventMutation) Metadata() (r *schema.ClickhouseJSON, exists bool) {
 // OldMetadata returns the old "metadata" field's value of the Event entity.
 // If the Event object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *EventMutation) OldMetadata(ctx context.Context) (v *schema.ClickhouseJSON, err error) {
+func (m *EventMutation) OldMetadata(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldMetadata is only allowed on UpdateOne operations")
 	}
@@ -288,9 +287,22 @@ func (m *EventMutation) OldMetadata(ctx context.Context) (v *schema.ClickhouseJS
 	return oldValue.Metadata, nil
 }
 
+// ClearMetadata clears the value of the "metadata" field.
+func (m *EventMutation) ClearMetadata() {
+	m.metadata = nil
+	m.clearedFields[event.FieldMetadata] = struct{}{}
+}
+
+// MetadataCleared returns if the "metadata" field was cleared in this mutation.
+func (m *EventMutation) MetadataCleared() bool {
+	_, ok := m.clearedFields[event.FieldMetadata]
+	return ok
+}
+
 // ResetMetadata resets all changes to the "metadata" field.
 func (m *EventMutation) ResetMetadata() {
 	m.metadata = nil
+	delete(m.clearedFields, event.FieldMetadata)
 }
 
 // Where appends a list predicates to the EventMutation builder.
@@ -404,7 +416,7 @@ func (m *EventMutation) SetField(name string, value ent.Value) error {
 		m.SetTimestamp(v)
 		return nil
 	case event.FieldMetadata:
-		v, ok := value.(*schema.ClickhouseJSON)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -439,7 +451,11 @@ func (m *EventMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *EventMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(event.FieldMetadata) {
+		fields = append(fields, event.FieldMetadata)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -452,6 +468,11 @@ func (m *EventMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *EventMutation) ClearField(name string) error {
+	switch name {
+	case event.FieldMetadata:
+		m.ClearMetadata()
+		return nil
+	}
 	return fmt.Errorf("unknown Event nullable field %s", name)
 }
 

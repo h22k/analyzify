@@ -22,7 +22,7 @@ type Event struct {
 	ent.Schema
 }
 
-type ClickhouseJSON map[string]string
+type ClickhouseJSON map[string]any
 
 func (m *ClickhouseJSON) Scan(src any) error {
 	switch v := src.(type) {
@@ -51,9 +51,7 @@ func (Event) Fields() []ent.Field {
 		field.UUID("userID", uuid.UUID{}).Immutable().StorageKey("userID"),
 		field.String("eventType").NotEmpty().StorageKey("event_type"),
 		field.Time("timestamp").Default(time.Now).Immutable(),
-		field.Other("metadata", &ClickhouseJSON{}).StorageKey("metadata").SchemaType(map[string]string{
-			"clickhouse": "JSON",
-		}),
+		field.String("metadata").StorageKey("metadata").Optional(),
 	}
 }
 

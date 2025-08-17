@@ -57,11 +57,6 @@ type ComplexityRoot struct {
 		UserID    func(childComplexity int) int
 	}
 
-	MetadataEntry struct {
-		Key   func(childComplexity int) int
-		Value func(childComplexity int) int
-	}
-
 	Mutation struct {
 		CreateEvent func(childComplexity int, input model.NewEvent) int
 	}
@@ -134,20 +129,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Event.UserID(childComplexity), true
 
-	case "MetadataEntry.key":
-		if e.complexity.MetadataEntry.Key == nil {
-			break
-		}
-
-		return e.complexity.MetadataEntry.Key(childComplexity), true
-
-	case "MetadataEntry.value":
-		if e.complexity.MetadataEntry.Value == nil {
-			break
-		}
-
-		return e.complexity.MetadataEntry.Value(childComplexity), true
-
 	case "Mutation.createEvent":
 		if e.complexity.Mutation.CreateEvent == nil {
 			break
@@ -192,7 +173,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputMetadataInput,
 		ec.unmarshalInputNewEvent,
 	)
 	first := true
@@ -608,9 +588,9 @@ func (ec *executionContext) _Event_metadata(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.MetadataEntry)
+	res := resTmp.(map[string]any)
 	fc.Result = res
-	return ec.marshalNMetadataEntry2ᚕᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataEntryᚄ(ctx, field.Selections, res)
+	return ec.marshalNJSON2map(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_metadata(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -620,101 +600,7 @@ func (ec *executionContext) fieldContext_Event_metadata(_ context.Context, field
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "key":
-				return ec.fieldContext_MetadataEntry_key(ctx, field)
-			case "value":
-				return ec.fieldContext_MetadataEntry_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MetadataEntry", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _MetadataEntry_key(ctx context.Context, field graphql.CollectedField, obj *model.MetadataEntry) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MetadataEntry_key(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Key, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MetadataEntry_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MetadataEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _MetadataEntry_value(ctx context.Context, field graphql.CollectedField, obj *model.MetadataEntry) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MetadataEntry_value(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Value, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MetadataEntry_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MetadataEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type JSON does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3000,40 +2886,6 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputMetadataInput(ctx context.Context, obj any) (model.MetadataInput, error) {
-	var it model.MetadataInput
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"key", "value"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "key":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Key = data
-		case "value":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Value = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj any) (model.NewEvent, error) {
 	var it model.NewEvent
 	asMap := map[string]any{}
@@ -3064,7 +2916,7 @@ func (ec *executionContext) unmarshalInputNewEvent(ctx context.Context, obj any)
 			it.EventType = data
 		case "metadata":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("metadata"))
-			data, err := ec.unmarshalNMetadataInput2ᚕᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataInputᚄ(ctx, v)
+			data, err := ec.unmarshalNJSON2map(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3116,50 +2968,6 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "metadata":
 			out.Values[i] = ec._Event_metadata(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var metadataEntryImplementors = []string{"MetadataEntry"}
-
-func (ec *executionContext) _MetadataEntry(ctx context.Context, sel ast.SelectionSet, obj *model.MetadataEntry) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, metadataEntryImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MetadataEntry")
-		case "key":
-			out.Values[i] = ec._MetadataEntry_key(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "value":
-			out.Values[i] = ec._MetadataEntry_value(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3735,78 +3543,26 @@ func (ec *executionContext) marshalNEvent2ᚖgithubᚗcomᚋh22kᚋanalyzifyᚋg
 	return ec._Event(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMetadataEntry2ᚕᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MetadataEntry) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNMetadataEntry2ᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataEntry(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
+func (ec *executionContext) unmarshalNJSON2map(ctx context.Context, v any) (map[string]any, error) {
+	res, err := UnmarshalJSON(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNMetadataEntry2ᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataEntry(ctx context.Context, sel ast.SelectionSet, v *model.MetadataEntry) graphql.Marshaler {
+func (ec *executionContext) marshalNJSON2map(ctx context.Context, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._MetadataEntry(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNMetadataInput2ᚕᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataInputᚄ(ctx context.Context, v any) ([]*model.MetadataInput, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
-	var err error
-	res := make([]*model.MetadataInput, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMetadataInput2ᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
+	_ = sel
+	res := MarshalJSON(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 	}
-	return res, nil
-}
-
-func (ec *executionContext) unmarshalNMetadataInput2ᚖgithubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐMetadataInput(ctx context.Context, v any) (*model.MetadataInput, error) {
-	res, err := ec.unmarshalInputMetadataInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
+	return res
 }
 
 func (ec *executionContext) unmarshalNNewEvent2githubᚗcomᚋh22kᚋanalyzifyᚋgraphᚋmodelᚐNewEvent(ctx context.Context, v any) (model.NewEvent, error) {
