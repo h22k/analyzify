@@ -14,4 +14,4 @@ architectural decisions made during the development of a software project.
 - Separated SQL queries into a separate file to improve maintainability and
   readability. Embedded SQL queries in Go via go:embed. [See the query file](./internal/db/clickhouse/sql/queries.go).
 - Used a bit tricky way to implement EntGo with Clickhouse, because EntGo does not support Clickhouse
-  natively. We had to use a custom driver and some workarounds to make it work. [See the driver implementation](./internal/db/clickhouse/clickhouse.go#L40).
+  natively. We had to use a custom connection object and some workarounds to make it work. [See the connection implementation](./internal/db/clickhouse/clickhouse.go#L39).
