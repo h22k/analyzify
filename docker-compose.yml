@@ -1,0 +1,56 @@
+services:
+  clickhouse-dev:
+    image: clickhouse/clickhouse-server:25.7-alpine
+    container_name: clickhouse-dev
+    profiles: ["dev"]
+    networks:
+      - analyzify_network
+    ports:
+      - "9000:9000"
+      - "8123:8123"
+    volumes:
+      - clickhouse_dev_data:/var/lib/clickhouse
+    environment:
+      - CLICKHOUSE_DB=analyzify
+      - CLICKHOUSE_USER=dev
+      - CLICKHOUSE_PASSWORD=password
+
+  clickhouse-test:
+    image: clickhouse/clickhouse-server:25.7-alpine
+    container_name: clickhouse-test
+    networks:
+      - analyzify_network
+    profiles: ["test"]
+    ports:
+      - "9001:9000"
+      - "8124:8123"
+    volumes:
+      - clickhouse_test_data:/var/lib/clickhouse
+    environment:
+      - CLICKHOUSE_DB=analyzify
+      - CLICKHOUSE_USER=dev
+      - CLICKHOUSE_PASSWORD=password
+
+  app:
+    build: .
+    container_name: go-analyzify-server
+    profiles: ["dev"]
+    networks:
+      - analyzify_network
+    depends_on:
+      - clickhouse-dev
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    command: air
+
+networks:
+  analyzify_network:
+    name: analyzify_network
+
+volumes:
+  clickhouse_dev_data:
+  clickhouse_test_data:

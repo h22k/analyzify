@@ -1,0 +1,39 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar UUID
+scalar Time
+
+type MetadataEntry {
+    key: String!
+    value: String!
+}
+
+type Event {
+    eventID: UUID!
+    userID: UUID!
+    timestamp: Time!
+    eventType: String!
+    metadata: [MetadataEntry!]!
+}
+
+input MetadataInput {
+    key: String!
+    value: String!
+}
+
+input NewEvent {
+    userID: UUID!
+    eventType: String!
+    metadata: [MetadataInput!]!
+}
+
+type Mutation {
+    createEvent(input: NewEvent!): Event!
+}
+
+type Query {
+    events(userID: UUID!): [Event!]!
+    event(eventID: UUID!): Event
+}
