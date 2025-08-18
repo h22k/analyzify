@@ -1,0 +1,45 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      clickhouse:
+        image: clickhouse/clickhouse-server:25.7-alpine
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "clickhouse-client --query 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          CLICKHOUSE_DB: analyzify
+          CLICKHOUSE_USER: dev
+          CLICKHOUSE_PASSWORD: password
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test container
+        run: docker compose --profile test build app-test
+
+      - name: Run tests
+        run: |
+          # ClickHouse servisi hazır olana kadar bekle
+          until nc -z localhost 9000; do
+            echo "Waiting for ClickHouse..."
+            sleep 1
+          done
+
+          # app-test containerında testleri çalıştır
+          docker compose --profile test run --rm app-test
