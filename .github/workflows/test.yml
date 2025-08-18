@@ -3,6 +3,8 @@ name: Run Tests
 on:
   push:
     branches: [ main, develop ]
+    paths-ignore:
+      - README.md
   pull_request:
 
 jobs:
@@ -35,11 +37,9 @@ jobs:
 
       - name: Run tests
         run: |
-          # ClickHouse servisi hazır olana kadar bekle
           until nc -z localhost 9000; do
             echo "Waiting for ClickHouse..."
             sleep 1
           done
 
-          # app-test containerında testleri çalıştır
           docker compose --profile test run --rm app-test
