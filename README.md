@@ -95,6 +95,7 @@ make dev
 #### Testing
 
 Since the project has a CI pipeline that runs tests on every push, you actually don't need to run tests locally.
+[See the last action run](https://github.com/h22k/analyzify/actions/runs/17044904404/job/48318038389)
 However, if you want to run the tests locally, you can do so with the following command.
 
 ```bash
