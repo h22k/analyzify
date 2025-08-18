@@ -62,10 +62,7 @@ func (r *queryResolver) EventCountByEventType(ctx context.Context, eventType *st
 
 	var result []*model.EventCount
 	for _, ec := range eventCounts {
-		result = append(result, &model.EventCount{
-			EventType: ec.EventType,
-			Count:     int32(ec.Count),
-		})
+		result = append(result, ec.ToGraphEventCountModel())
 	}
 
 	return result, nil

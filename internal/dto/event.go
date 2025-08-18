@@ -21,6 +21,13 @@ type EventCountDTO struct {
 	Count     int    `json:"count"`
 }
 
+func (eventCount EventCountDTO) ToGraphEventCountModel() *model.EventCount {
+	return &model.EventCount{
+		EventType: eventCount.EventType,
+		Count:     int32(eventCount.Count),
+	}
+}
+
 type EventDTO struct {
 	EventID   uuid.UUID
 	UserID    uuid.UUID
