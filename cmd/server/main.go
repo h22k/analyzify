@@ -12,11 +12,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/h22k/analyzify/config"
 	"github.com/h22k/analyzify/graph"
 	"github.com/h22k/analyzify/internal/db/clickhouse"
 	"github.com/h22k/analyzify/internal/service"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 func main() {
@@ -27,7 +28,6 @@ func main() {
 	conn := clickhouse.NewConn(cfg.DbHost(), cfg.DbUser(), cfg.DbPass(), cfg.DbPort(), cfg.DbName())
 
 	if err := conn.Migrate(); err != nil {
-		cancel()
 		if closeErr := conn.Close(); closeErr != nil {
 			panic("failed to close ClickHouse connection: " + closeErr.Error())
 		}

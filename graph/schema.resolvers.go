@@ -14,11 +14,6 @@ import (
 	"github.com/h22k/analyzify/internal/dto"
 )
 
-var (
-	EventCreateErr = errors.New("failed to create event")
-	EventFetchErr  = errors.New("failed to fetch events")
-)
-
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input model.NewEvent) (*model.Event, error) {
 	event, err := r.EventService.CreateEvent(ctx, dto.CreateEventDTO{

@@ -2,7 +2,7 @@ services:
   clickhouse-dev:
     image: clickhouse/clickhouse-server:25.7-alpine
     container_name: clickhouse-dev
-    profiles: ["dev"]
+    profiles: [ "dev" ]
     networks:
       - analyzify_network
     ports:
@@ -19,8 +19,8 @@ services:
     image: clickhouse/clickhouse-server:25.7-alpine
     container_name: clickhouse-test
     networks:
-      - analyzify_network
-    profiles: ["test"]
+      - analyzify_network_test
+    profiles: [ "test" ]
     ports:
       - "9001:9000"
       - "8124:8123"
@@ -31,10 +31,25 @@ services:
       - CLICKHOUSE_USER=dev
       - CLICKHOUSE_PASSWORD=password
 
+  app-test:
+    build:
+      context: .
+      dockerfile: test.Dockerfile
+    container_name: go-analyzify-server-test
+    profiles: [ "test" ]
+    networks:
+      - analyzify_network_test
+    depends_on:
+      - clickhouse-test
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: [ "./run-tests.sh" ]
   app:
     build: .
     container_name: go-analyzify-server
-    profiles: ["dev"]
+    profiles: [ "dev" ]
     networks:
       - analyzify_network
     depends_on:
@@ -50,6 +65,8 @@ services:
 networks:
   analyzify_network:
     name: analyzify_network
+  analyzify_network_test:
+    name: analyzify_network_test
 
 volumes:
   clickhouse_dev_data:
