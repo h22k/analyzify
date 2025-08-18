@@ -16,6 +16,11 @@ type Event struct {
 	Metadata  map[string]any `json:"metadata"`
 }
 
+type EventCount struct {
+	EventType string `json:"eventType"`
+	Count     int32  `json:"count"`
+}
+
 type Mutation struct {
 }
 

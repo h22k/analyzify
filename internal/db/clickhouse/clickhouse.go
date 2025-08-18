@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"time"
 
 	esql "entgo.io/ent/dialect/sql"
 	"github.com/ClickHouse/clickhouse-go/v2"
+	"github.com/google/uuid"
 	"github.com/h22k/analyzify/ent"
+	"github.com/h22k/analyzify/ent/event"
 	query "github.com/h22k/analyzify/internal/db/clickhouse/sql"
 	"github.com/h22k/analyzify/internal/dto"
 )
@@ -21,6 +23,8 @@ var (
 	MigrationFailedErr          = errors.New("ClickHouse migration failed")
 	ConnectionCloseErr          = errors.New("ClickHouse connection close error")
 	EntConnectionCloseErr       = errors.New("ent client close error")
+	EventCountByEventTypeErr    = errors.New("failed to get event count by event type")
+	JsonMarshalErr              = errors.New("failed to marshal metadata to JSON")
 )
 
 func NewConn(dbHost, dbUser, dbPass, dbPort, dbName string) *Conn {
@@ -61,14 +65,37 @@ func (c *Conn) Migrate() error {
 	return nil
 }
 
-func (c *Conn) GetAllEvents(ctx context.Context) ([]*ent.Event, error) {
-	return c.client.Debug().Event.Query().All(ctx)
+func (c *Conn) GetEventCountByEventType(ctx context.Context, eventType *string, from, to time.Time) ([]dto.EventCountDTO, error) {
+	var eventCounts []dto.EventCountDTO
+
+	err := c.client.
+		Event.
+		Query().
+		Select(event.FieldEventType).
+		Where(
+			event.TimestampGTE(from),
+			event.TimestampLTE(to),
+		).
+		Modify(func(s *esql.Selector) {
+			s.GroupBy(event.FieldEventType)
+			if eventType != nil {
+				s.Having(esql.EQ(event.FieldEventType, *eventType))
+			}
+		}).
+		Aggregate(ent.Count()).
+		Scan(ctx, &eventCounts)
+
+	if err != nil {
+		return nil, errors.Join(err, EventCountByEventTypeErr)
+	}
+
+	return eventCounts, nil
 }
 
 func (c *Conn) CreateEvent(ctx context.Context, dto dto.CreateEventDTO) (*ent.Event, error) {
 	metadataBytes, err := json.Marshal(dto.Metadata)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal metadata: %w", err)
+		return nil, errors.Join(err, JsonMarshalErr)
 	}
 
 	return c.client.
@@ -80,6 +107,20 @@ func (c *Conn) CreateEvent(ctx context.Context, dto dto.CreateEventDTO) (*ent.Ev
 		SetTimestamp(dto.Timestamp).
 		SetMetadata(string(metadataBytes)).
 		Save(ctx)
+}
+
+func (c *Conn) GetEventsByUserID(ctx context.Context, userID uuid.UUID) ([]*ent.Event, error) {
+	return c.client.
+		Event.
+		Query().
+		Modify(func(s *esql.Selector) {
+			s.AppendSelect(
+				// convert metadata to string for ClickHouse and EntGo compatibility
+				esql.As("toString(metadata)", "metadata"),
+			)
+		}).
+		Where(event.UserIDEQ(userID)).
+		All(ctx)
 }
 
 func (c *Conn) Close() error {

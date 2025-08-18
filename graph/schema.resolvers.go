@@ -6,13 +6,17 @@ package graph
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/h22k/analyzify/graph/model"
 	"github.com/h22k/analyzify/internal/dto"
+)
+
+var (
+	EventCreateErr = errors.New("failed to create event")
+	EventFetchErr  = errors.New("failed to fetch events")
 )
 
 // CreateEvent is the resolver for the createEvent field.
@@ -26,27 +30,45 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input model.NewEvent
 	})
 
 	if err != nil {
-		log.Printf("failed to create event: %v", err) // <- hatayı logla
-		return nil, fmt.Errorf("failed to create event: %w", err)
+		return nil, errors.Join(err, EventCreateErr)
 	}
 
-	return &model.Event{
-		EventID:   event.EventID,
-		UserID:    event.UserID,
-		EventType: event.EventType,
-		Timestamp: event.Timestamp,
-		Metadata:  event.Metadata,
-	}, nil
+	return event.ToGraphqlEventModel(), nil
 }
 
-// Events is the resolver for the events field.
-func (r *queryResolver) Events(ctx context.Context, userID uuid.UUID) ([]*model.Event, error) {
-	panic(fmt.Errorf("not implemented: Events - events"))
+// EventsByUserID is the resolver for the eventsByUserID field.
+func (r *queryResolver) EventsByUserID(ctx context.Context, userID uuid.UUID) ([]*model.Event, error) {
+	events, err := r.EventService.GetEventsByUserID(ctx, userID)
+
+	if err != nil {
+		return nil, errors.Join(err, EventFetchErr)
+	}
+
+	var result []*model.Event
+	for _, e := range events {
+		result = append(result, e.ToGraphqlEventModel())
+	}
+
+	return result, nil
 }
 
-// Event is the resolver for the event field.
-func (r *queryResolver) Event(ctx context.Context, eventID uuid.UUID) (*model.Event, error) {
-	panic(fmt.Errorf("not implemented: Event - event"))
+// EventCountByEventType is the resolver for the eventCountByEventType field.
+func (r *queryResolver) EventCountByEventType(ctx context.Context, eventType *string, from time.Time, to time.Time) ([]*model.EventCount, error) {
+	eventCounts, err := r.EventService.GetEventCountByEventType(ctx, eventType, from, to)
+
+	if err != nil {
+		return nil, errors.Join(err, EventFetchErr)
+	}
+
+	var result []*model.EventCount
+	for _, ec := range eventCounts {
+		result = append(result, &model.EventCount{
+			EventType: ec.EventType,
+			Count:     int32(ec.Count),
+		})
+	}
+
+	return result, nil
 }
 
 // Mutation returns MutationResolver implementation.
