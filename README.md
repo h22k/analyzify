@@ -6,6 +6,10 @@ This repository contains a Go-based event tracking system using ClickHouse as th
 with a GraphQL API for recording and retrieving events.
 All the information you need to get started, including setup and usage instructions, is available in this README.md.
 
+##### Video Overview
+
+<div> <a href="https://www.loom.com/share/5b0a0177d13241dfbc0a6e1d88e740cb"> <p>Analyzify playground - 18 August 2025 - Watch Video</p> </a> <a href="https://www.loom.com/share/5b0a0177d13241dfbc0a6e1d88e740cb"> <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/5b0a0177d13241dfbc0a6e1d88e740cb-387d20de58325e98-full-play.gif"> </a> </div>
+
 ---
 
 ### Task
