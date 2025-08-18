@@ -74,6 +74,8 @@ improvement if this were a production-ready system.
   maintainable.
 - Separating environment variables into dedicated configuration files (e.g., .env.local, .env.prod) could further
   enhance maintainability and make the setup clearer and more readable.
+- The project could benefit from implementing graceful shutdown for the HTTP server and database connections. Properly closing connections and releasing resources would make the application more robust and production-ready.
+  - Pairing graceful shutdown with a bulk insert strategy for ClickHouse could make the system feel even more solid and reliable, ensuring smooth data insertion and efficient retrieval while everything shuts down cleanly.
 
 ---
 
